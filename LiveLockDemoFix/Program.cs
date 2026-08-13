@@ -73,14 +73,22 @@ public class Walker
 
 			var blocked = hallway.AreOnSameSide(this, other);
 			decisionPoint.SignalAndWait(token);
+
 			if (!blocked)
 			{
 				Console.WriteLine($"{Name}: We are on different sides. I can pass!");
 				return;
 			}
-
-			hallway.SwitchSide(this);
-			Console.WriteLine($"{Name}: I move to the other side to let {other.Name} pass.");
+            // Her fixer vi livelock ved at introducere en prioritet baseret på navnene, så kun den "lavere" navngivne person skifter side, mens den anden venter.
+			if (string.CompareOrdinal(Name, other.Name) < 0)
+			{
+				hallway.SwitchSide(this);
+				Console.WriteLine($"{Name}: I move to the other side to let {other.Name} pass.");
+			}
+			else
+			{
+				Console.WriteLine($"{Name}: I wait for {other.Name} to move.");
+			}
 
 			await Task.Delay(200, token);
 		}
